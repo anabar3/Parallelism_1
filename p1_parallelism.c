@@ -2,11 +2,6 @@
 #include <math.h>
 #include <mpi.h>
 
-int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm) {
-    
-}
-
-
 int main(int argc, char *argv[]) {
     //Initial variables
     int i, n, rank, numprocs;
