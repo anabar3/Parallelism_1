@@ -4,8 +4,19 @@
 
 int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm) {
     int rank, numprocs, i;
+    double pi = 0.0;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &numprocs);
+
+    //Check all possible MPI errors
+    if (sendbuf == NULL || recvbuf == NULL)     return MPI_ERR_BUFFER;
+    if (count < 0)                              return MPI_ERR_COUNT;
+    if (datatype != MPI_DOUBLE)                 return MPI_ERR_TYPE;
+    if (op != MPI_SUM)                          return MPI_ERR_OP;
+    if (root < 0 || root >= numprocs)           return MPI_ERR_ROOT;
+    if (comm == MPI_COMM_NULL)                  return MPI_ERR_COMM;
+
+
     if (rank != root) { //If we are not the root process, send the result of all the calculations to the root
         MPI_Send(&sendbuf, count, MPI_DOUBLE, root, 0, MPI_COMM_WORLD);
     }
@@ -15,9 +26,11 @@ int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Da
             MPI_Recv(&temp, count, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             //Apply the operation to the result
-            
+            pi += temp;
         }
+        recvbuf = &pi;
     }
+    return MPI_SUCCESS;
 }
 
 int main(int argc, char *argv[]) {
@@ -50,7 +63,7 @@ int main(int argc, char *argv[]) {
         }
 
         //Collective operation to sum all the results
-        MPI_Reduce(&sum, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+        MPI_FlattreeCollective(&sum, &pi, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
         if (rank == 0) {
             pi *= h;
