@@ -7,15 +7,15 @@ int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Da
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &numprocs);
     if (rank != root) { //If we are not the root process, send the result of all the calculations to the root
-        MPI_Send(&sendbuf, count, datatype, root, 0, MPI_COMM_WORLD);
+        MPI_Send(&sendbuf, count, MPI_DOUBLE, root, 0, MPI_COMM_WORLD);
     }
     else {
         for (i = 1; i < numprocs; i++) { //If we are the root process, receive the results from the other processes
-            void *temp;
-            MPI_Recv(&temp, count, datatype, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+            double temp;
+            MPI_Recv(&temp, count, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
             //Apply the operation to the result
-
+            
         }
     }
 }
