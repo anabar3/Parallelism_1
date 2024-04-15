@@ -34,6 +34,26 @@ int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Da
     return MPI_SUCCESS;
 }
 
+int MPI_BinomialColective(void *buffer, int count, MPI_Datatype datatype, int root, MPI_Comm comm) {
+    int rank, numprocs;
+    MPI_Comm_rank(comm, &rank);
+    MPI_Comm_size(comm, &numprocs);
+
+    for (int i = 1; i <= log2(numprocs); i++) { //we use log2 iterations because of the tree structure
+        int addFactor = pow(2, i - 1); //following the formula given to calculate the pair of the process
+        if (rank < addFactor) { //If we are in the position to send
+            //printf("Rank %d sending to %d\n", rank, rank + addFactor);
+            MPI_Send(buffer, count, datatype, rank + addFactor, 0, comm);
+        }
+        else if(rank-addFactor < addFactor){ //if we don't have to send, we receive ONLY if our pair is in the position to send
+            //printf("Rank %d receiving from %d\n", rank, rank - addFactor);
+            MPI_Recv(buffer, count, datatype, rank - addFactor, 0, comm, MPI_STATUS_IGNORE);
+        }
+    }
+
+    return MPI_SUCCESS;
+}
+
 int main(int argc, char *argv[]) {
     //Initial variables
     int i, n, rank, numprocs;
@@ -52,7 +72,7 @@ int main(int argc, char *argv[]) {
         }
 
         //Broadcast n to all processes
-        MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_BinomialColective(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
         if (n == 0) break;
 
