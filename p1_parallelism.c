@@ -18,7 +18,7 @@ int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Da
 
 
     if (rank != root) { //If we are not the root process, send the result of all the calculations to the root
-        MPI_Send(&sendbuf, count, MPI_DOUBLE, root, 0, MPI_COMM_WORLD);
+        MPI_Send(sendbuf, count, MPI_DOUBLE, root, 0, MPI_COMM_WORLD);
     }
     else {
         for (i = 1; i < numprocs; i++) { //If we are the root process, receive the results from the other processes
@@ -28,7 +28,7 @@ int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Da
             //Apply the operation to the result
             pi += temp;
         }
-        recvbuf = &pi;
+        *(double *)recvbuf = pi;
     }
     return MPI_SUCCESS;
 }
