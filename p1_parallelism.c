@@ -4,7 +4,7 @@
 
 int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype, MPI_Op op, int root, MPI_Comm comm) {
     int rank, numprocs, i;
-    double pi = 0.0;
+    double pi;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &numprocs);
 
@@ -21,6 +21,7 @@ int MPI_FlattreeCollective(const void *sendbuf, void *recvbuf, int count, MPI_Da
         MPI_Send(sendbuf, count, MPI_DOUBLE, root, 0, MPI_COMM_WORLD);
     }
     else {
+        pi = *(double *)sendbuf;
         for (i = 1; i < numprocs; i++) { //If we are the root process, receive the results from the other processes
             double temp;
             MPI_Recv(&temp, count, MPI_DOUBLE, i, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
