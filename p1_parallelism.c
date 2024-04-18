@@ -41,7 +41,7 @@ int MPI_BinomialColective(void *buffer, int count, MPI_Datatype datatype, int ro
 
     for (int i = 1; i <= log2(numprocs); i++) { //we use log2 iterations because of the tree structure
         int addFactor = pow(2, i - 1); //following the formula given to calculate the pair of the process
-        if (rank < addFactor) { //If we are in the position to send
+        if (rank < addFactor && rank+addFactor < numprocs) { //If we are in the position to send
             //printf("Rank %d sending to %d\n", rank, rank + addFactor);
             MPI_Send(buffer, count, datatype, rank + addFactor, 0, comm);
         }
